@@ -1,4 +1,4 @@
-export const exerciseCategories: string[] = [
+export const initialExerciseCategories: string[] = [
     "가슴",
     "등",
     "어깨",
@@ -8,7 +8,7 @@ export const exerciseCategories: string[] = [
     "유산소",
 ];
 
-export const exercisesData: Record<string, string[]> = {
+export const initialExercisesData: Record<string, string[]> = {
     "가슴": ["벤치프레스", "인클라인 벤치프레스", "덤벨 프레스", "푸시업", "딥스", "케이블 크로스오버"],
     "등": ["풀업", "친업", "데드리프트", "바벨 로우", "덤벨 로우", "랫 풀 다운", "시티드 로우"],
     "어깨": ["오버헤드 프레스", "사이드 레터럴 레이즈", "프론트 레이즈", "페이스풀", "벤트오버 레터럴 레이즈"],

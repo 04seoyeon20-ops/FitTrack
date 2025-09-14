@@ -1,124 +1,123 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '../types';
 import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
+import { User } from '../types';
 import Loader from '../components/Loader';
+import { PencilIcon, CheckIcon, XMarkIcon } from '../components/Icons';
+
+const ProfileField: React.FC<{ label: string; value: string | number; isEditing: boolean; onChange: (value: string) => void; type?: string }> = ({ label, value, isEditing, onChange, type = 'text' }) => (
+    <div>
+        <label className="block text-sm font-medium text-gray-500">{label}</label>
+        {isEditing ? (
+            <input
+                type={type}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+        ) : (
+            <p className="mt-1 text-lg text-gray-800">{value} {type === 'number' && (label.includes('kg') ? 'kg' : label.includes('cm') ? 'cm' : '')}</p>
+        )}
+    </div>
+);
 
 const MyProfile: React.FC = () => {
-  const { user, updateUser } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState<User | null>(null);
+    const { user, updateUser } = useAuth();
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState<User | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      setEditedUser(user);
+    useEffect(() => {
+        if (user) {
+            setFormData(user);
+        }
+    }, [user]);
+
+    if (!user || !formData) {
+        return <div className="flex justify-center items-center h-full"><Loader /></div>;
     }
-  }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editedUser) {
-      const { name, value } = e.target;
-      setEditedUser({ ...editedUser, [name]: name === 'age' || name === 'weight' || name === 'height' ? Number(value) : value });
-    }
-  };
+    const handleEditToggle = () => {
+        if (isEditing) {
+            // Reset changes if cancelling
+            setFormData(user);
+        }
+        setIsEditing(!isEditing);
+    };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editedUser) {
-        await updateUser(editedUser);
-        setIsEditing(false);
-    }
-  };
+    const handleInputChange = (field: keyof User, value: string | number) => {
+        setFormData(prev => prev ? { ...prev, [field]: value } : null);
+    };
 
-  if (!editedUser) {
-    return <div className="flex justify-center items-center h-full"><Loader /></div>;
-  }
+    const handleSave = async () => {
+        if (formData) {
+            await updateUser(formData);
+            setIsEditing(false);
+        }
+    };
 
-  return (
-    <div>
-      <PageHeader title="내 프로필" subtitle="개인 정보 및 설정을 관리하세요." />
-      
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
-        <div className="flex flex-col items-center">
-          <img src={editedUser.avatarUrl} alt="User Avatar" className="w-32 h-32 rounded-full mb-4 ring-4 ring-blue-200" />
-          <h2 className="text-2xl font-bold text-gray-800">{editedUser.name}</h2>
+    return (
+        <div>
+            <PageHeader title="내 프로필" subtitle="개인 정보를 확인하고 수정할 수 있습니다." />
+
+            <div className="bg-white p-8 rounded-xl shadow-md max-w-2xl mx-auto">
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                        <img src={user.avatarUrl} alt={user.name} className="w-24 h-24 rounded-full" />
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-800">{user.name}</h2>
+                            <p className="text-gray-500">{user.age}세</p>
+                        </div>
+                    </div>
+                    <div>
+                        {isEditing ? (
+                             <div className="flex gap-2">
+                                <button onClick={handleSave} className="p-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200">
+                                    <CheckIcon className="w-6 h-6" />
+                                </button>
+                                 <button onClick={handleEditToggle} className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200">
+                                    <XMarkIcon className="w-6 h-6" />
+                                </button>
+                            </div>
+                        ) : (
+                            <button onClick={handleEditToggle} className="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+                                <PencilIcon className="w-6 h-6" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ProfileField
+                        label="이름"
+                        value={formData.name}
+                        isEditing={isEditing}
+                        onChange={(val) => handleInputChange('name', val)}
+                    />
+                     <ProfileField
+                        label="나이"
+                        value={formData.age}
+                        isEditing={isEditing}
+                        onChange={(val) => handleInputChange('age', Number(val))}
+                        type="number"
+                    />
+                     <ProfileField
+                        label="현재 체중 (kg)"
+                        value={formData.weight}
+                        isEditing={isEditing}
+                        onChange={(val) => handleInputChange('weight', Number(val))}
+                        type="number"
+                    />
+                     <ProfileField
+                        label="신장 (cm)"
+                        value={formData.height}
+                        isEditing={isEditing}
+                        onChange={(val) => handleInputChange('height', Number(val))}
+                        type="number"
+                    />
+                </div>
+            </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">이름</label>
-            <input 
-              type="text" 
-              name="name" 
-              id="name" 
-              value={editedUser.name}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700">나이</label>
-              <input 
-                type="number" 
-                name="age" 
-                id="age"
-                value={editedUser.age}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100"
-              />
-            </div>
-            <div>
-              <label htmlFor="weight" className="block text-sm font-medium text-gray-700">체중 (kg)</label>
-              <input 
-                type="number" 
-                name="weight" 
-                id="weight"
-                step="0.1"
-                value={editedUser.weight}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100"
-              />
-            </div>
-            <div>
-              <label htmlFor="height" className="block text-sm font-medium text-gray-700">신장 (cm)</label>
-              <input 
-                type="number" 
-                name="height" 
-                id="height"
-                step="0.1"
-                value={editedUser.height}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100"
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-end space-x-4">
-            {isEditing ? (
-              <>
-                <button type="button" onClick={() => { setIsEditing(false); setEditedUser(user); }} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                  취소
-                </button>
-                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                  변경 내용 저장
-                </button>
-              </>
-            ) : (
-              <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                프로필 수정
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default MyProfile;

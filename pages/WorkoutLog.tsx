@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PageHeader from '../components/PageHeader';
 import { Workout, WorkoutExercise, SetDetail } from '../types';
-import { exerciseCategories, exercisesData } from '../data/exercises';
+import { initialExerciseCategories, initialExercisesData } from '../data/exercises';
 import { mockWorkouts } from '../data/mockData';
 import { PlusCircleIcon, TrashIcon, PencilIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '../components/Icons';
 
@@ -11,6 +11,33 @@ const WorkoutLog: React.FC = () => {
     const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    
+    // Exercise list state management
+    const [exerciseData, setExerciseData] = useState<Record<string, string[]>>({});
+    const [exerciseCategories, setExerciseCategories] = useState<string[]>([]);
+    const [isAddingNewExercise, setIsAddingNewExercise] = useState(false);
+    const [newExerciseName, setNewExerciseName] = useState('');
+
+    useEffect(() => {
+        const savedExercises = localStorage.getItem('userExercises');
+        const savedCategories = localStorage.getItem('userExerciseCategories');
+
+        if (savedExercises && savedCategories) {
+            setExerciseData(JSON.parse(savedExercises));
+            setExerciseCategories(JSON.parse(savedCategories));
+        } else {
+            setExerciseData(initialExercisesData);
+            setExerciseCategories(initialExerciseCategories);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (Object.keys(exerciseData).length > 0) {
+            localStorage.setItem('userExercises', JSON.stringify(exerciseData));
+            localStorage.setItem('userExerciseCategories', JSON.stringify(exerciseCategories));
+        }
+    }, [exerciseData, exerciseCategories]);
+
 
     const workoutDates = useMemo(() => new Set(workouts.map(w => w.date)), [workouts]);
 
@@ -32,6 +59,8 @@ const WorkoutLog: React.FC = () => {
                 exercises: []
             });
         }
+        setIsAddingNewExercise(false);
+        setNewExerciseName('');
         setIsModalOpen(true);
     };
 
@@ -71,6 +100,41 @@ const WorkoutLog: React.FC = () => {
         };
         setCurrentWorkout({ ...currentWorkout, exercises: [...currentWorkout.exercises, newExercise] });
     };
+
+    const handleAddNewExercise = () => {
+        const trimmedName = newExerciseName.trim();
+        if (!trimmedName) {
+            alert('운동 이름을 입력해주세요.');
+            return;
+        }
+
+        const allExercises = Object.values(exerciseData).flat();
+        if (allExercises.map(e => e.toLowerCase()).includes(trimmedName.toLowerCase())) {
+            alert('이미 존재하는 운동입니다.');
+            return;
+        }
+
+        const newCategory = '사용자 정의';
+
+        setExerciseData(prevData => {
+            const newData = { ...prevData };
+            if (!newData[newCategory]) {
+                newData[newCategory] = [];
+            }
+            newData[newCategory].push(trimmedName);
+            return newData;
+        });
+
+        if (!exerciseCategories.includes(newCategory)) {
+            setExerciseCategories(prev => [...prev, newCategory]);
+        }
+        
+        addExercise(trimmedName);
+
+        setNewExerciseName('');
+        setIsAddingNewExercise(false);
+    };
+
 
     const removeExercise = (exerciseId: string) => {
         if (!currentWorkout) return;
@@ -273,18 +337,43 @@ const WorkoutLog: React.FC = () => {
                                 ))}
                             </div>
 
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-gray-700">운동 추가</label>
-                                <div className="flex gap-2 mt-1">
-                                    <select onChange={e => {addExercise(e.target.value); e.target.value = ""}} className="flex-grow border-gray-300 rounded-md shadow-sm">
+                            <div className="mt-6 pt-4 border-t">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">운동 추가</label>
+                                {isAddingNewExercise ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newExerciseName}
+                                            onChange={(e) => setNewExerciseName(e.target.value)}
+                                            placeholder="새 운동 이름"
+                                            className="flex-grow border-gray-300 rounded-md shadow-sm"
+                                            autoFocus
+                                        />
+                                        <button onClick={handleAddNewExercise} className="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">추가</button>
+                                        <button onClick={() => setIsAddingNewExercise(false)} className="px-3 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">취소</button>
+                                    </div>
+                                ) : (
+                                    <select 
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '__add_new__') {
+                                                setIsAddingNewExercise(true);
+                                            } else if (value) {
+                                                addExercise(value);
+                                            }
+                                            e.target.value = ""; // Reset select after action
+                                        }}
+                                        className="w-full border-gray-300 rounded-md shadow-sm"
+                                    >
                                         <option value="">운동을 선택하세요</option>
                                         {exerciseCategories.map(cat => (
                                             <optgroup label={cat} key={cat}>
-                                                {exercisesData[cat].map(exName => <option key={exName} value={exName}>{exName}</option>)}
+                                                {exerciseData[cat]?.map(exName => <option key={exName} value={exName}>{exName}</option>)}
                                             </optgroup>
                                         ))}
+                                        <option value="__add_new__" className="font-bold text-blue-600">⊕ 새로운 운동 추가...</option>
                                     </select>
-                                </div>
+                                )}
                             </div>
                         </div>
 

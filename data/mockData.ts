@@ -51,6 +51,15 @@ export const mockWorkouts: Workout[] = [
         ],
     },
     {
+        id: 'w_new1',
+        date: '2023-10-25',
+        name: '하체 집중',
+        exercises: [
+            { id: 'e_new1', name: '스쿼트', sets: [{ id: 's_new1', weight: 90, reps: 8 }, { id: 's_new2', weight: 90, reps: 8 }, {id: 's_new3', weight: 95, reps: 6}] },
+            { id: 'e_new2', name: '레그 컬', sets: [{ id: 's_new4', weight: 40, reps: 15 }, { id: 's_new5', weight: 45, reps: 12 }] },
+        ],
+    },
+    {
         id: 'w2',
         date: '2023-10-24',
         name: '등/이두 운동',
@@ -58,6 +67,15 @@ export const mockWorkouts: Workout[] = [
             { id: 'e3', name: '데드리프트', sets: [{ id: 's5', weight: 100, reps: 5 }, { id: 's5a', weight: 110, reps: 3 }] },
             { id: 'e4', name: '풀업', sets: [{ id: 's6', weight: 0, reps: 8 }, { id: 's7', weight: 0, reps: 7 }] },
             { id: 'e5', name: '바벨 컬', sets: [{ id: 's8', weight: 20, reps: 10 }] },
+        ],
+    },
+    {
+        id: 'w_new2',
+        date: '2023-10-23',
+        name: '가슴 운동',
+        exercises: [
+            { id: 'e_new3', name: '벤치프레스', sets: [{ id: 's_new6', weight: 65, reps: 10 }, { id: 's_new7', weight: 65, reps: 10 }, {id: 's_new8', weight: 70, reps: 7}] },
+            { id: 'e_new4', name: '덤벨 프레스', sets: [{ id: 's_new9', weight: 20, reps: 12 }, { id: 's_new10', weight: 22, reps: 10 }] },
         ],
     },
     {
@@ -133,4 +151,4 @@ export const mockWorkouts: Workout[] = [
             { id: 'e22', name: '풀업', sets: [{ id: 's37', weight: 0, reps: 5 }] },
         ],
     },
-];
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
