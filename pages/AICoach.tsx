@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import { User, ChatMessage } from '../types';
 import PageHeader from '../components/PageHeader';
-import { PaperAirplaneIcon } from '../components/Icons';
+import { PaperAirplaneIcon, UserCircleIcon } from '../components/Icons';
 import { useAuth } from '../contexts/AuthContext';
 import Loader from '../components/Loader';
 
@@ -83,14 +83,18 @@ const AICoach: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)]">
+        <div className="flex flex-col h-full">
             <PageHeader title="AI 피트니스 코치" subtitle="운동, 식단, 건강에 대해 무엇이든 물어보세요!" />
 
-            <div className="flex-1 flex flex-col bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="flex-1 flex flex-col bg-white rounded-xl shadow-md overflow-hidden min-h-0">
                 <div ref={chatContainerRef} className="flex-1 p-6 space-y-4 overflow-y-auto">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                            {msg.role === 'model' && <img src="/vite.svg" alt="AI Coach" className="w-8 h-8 rounded-full bg-blue-100 p-1" />}
+                            {msg.role === 'model' && (
+                                <div className="w-8 h-8 rounded-full bg-blue-100 p-1 flex items-center justify-center flex-shrink-0">
+                                    <UserCircleIcon className="w-full h-full text-blue-600" />
+                                </div>
+                            )}
                             <div className={`max-w-lg px-4 py-3 rounded-xl ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
                                 {formatText(msg.text)}
                             </div>
@@ -99,7 +103,9 @@ const AICoach: React.FC = () => {
                     ))}
                     {isLoading && messages.length > 0 && (
                          <div className="flex items-end gap-3">
-                             <img src="/vite.svg" alt="AI Coach" className="w-8 h-8 rounded-full bg-blue-100 p-1" />
+                             <div className="w-8 h-8 rounded-full bg-blue-100 p-1 flex items-center justify-center flex-shrink-0">
+                                <UserCircleIcon className="w-full h-full text-blue-600" />
+                            </div>
                              <div className="max-w-lg px-4 py-3 rounded-xl bg-gray-200 text-gray-800">
                                 <div className="flex items-center justify-center space-x-1">
                                     <span className="w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:-0.3s]"></span>

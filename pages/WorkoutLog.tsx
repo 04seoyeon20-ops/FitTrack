@@ -190,21 +190,23 @@ const WorkoutLog: React.FC = () => {
         const today = new Date();
 
         const cells = [];
+        // Fill empty cells for days before the 1st of the month
         for (let i = 0; i < firstDayOfMonth; i++) {
-            cells.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
+            cells.push(<div key={`empty-${i}`} className="w-full aspect-square"></div>);
         }
-
+    
+        // Fill cells for each day of the month
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
             const isSelected = dateStr === selectedDate;
             const hasWorkout = workoutDates.has(dateStr);
-
+    
             cells.push(
-                <div key={day} className="flex justify-center items-center">
+                <div key={day} className="flex justify-center items-center w-full aspect-square">
                     <button
                         onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-                        className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                        className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors text-sm sm:text-base ${
                             isSelected ? 'bg-blue-600 text-white font-bold' : isToday ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
                         }`}
                     >
@@ -214,22 +216,22 @@ const WorkoutLog: React.FC = () => {
                 </div>
             );
         }
-
+    
         return (
-            <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-6">
                 <div className="flex items-center justify-between mb-4">
                     <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2 rounded-full hover:bg-gray-100">
                         <ChevronLeftIcon className="w-6 h-6" />
                     </button>
-                    <h2 className="text-xl font-bold">{`${year}년 ${month + 1}월`}</h2>
+                    <h2 className="text-lg sm:text-xl font-bold">{`${year}년 ${month + 1}월`}</h2>
                     <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-2 rounded-full hover:bg-gray-100">
                         <ChevronRightIcon className="w-6 h-6" />
                     </button>
                 </div>
-                <div className="grid grid-cols-7 gap-2 text-center text-sm text-gray-500 mb-2">
+                <div className="grid grid-cols-7 gap-1 text-center text-xs sm:text-sm text-gray-500 mb-2">
                     {daysOfWeek.map(day => <div key={day}>{day}</div>)}
                 </div>
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1">
                     {cells}
                 </div>
             </div>
@@ -242,7 +244,7 @@ const WorkoutLog: React.FC = () => {
 
             {renderCalendar()}
 
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                 <div>
                 {selectedDate && (
                      <div className="flex items-center gap-2">
@@ -253,7 +255,7 @@ const WorkoutLog: React.FC = () => {
                 </div>
                 <button
                     onClick={() => openModal()}
-                    className="inline-flex items-center gap-2 px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
                     새 운동 기록하기
@@ -296,8 +298,8 @@ const WorkoutLog: React.FC = () => {
             </div>
 
             {isModalOpen && currentWorkout && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
                         <div className="flex items-center justify-between p-4 border-b">
                             <h3 className="text-xl font-bold">{currentWorkout.id.startsWith('w_') ? '운동 기록 수정' : '새 운동 기록'}</h3>
                             <button onClick={closeModal}><XMarkIcon className="w-6 h-6" /></button>
@@ -323,8 +325,8 @@ const WorkoutLog: React.FC = () => {
                                             <button onClick={() => removeExercise(ex.id)}><TrashIcon className="w-5 h-5 text-red-500" /></button>
                                         </div>
                                         {ex.sets.map((set, index) => (
-                                            <div key={set.id} className="flex items-center gap-2 mb-1">
-                                                <span className="font-semibold">{index + 1}</span>
+                                            <div key={set.id} className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="font-semibold w-8 text-center">{index + 1}</span>
                                                 <input type="number" value={set.weight} onChange={e => handleSetChange(ex.id, set.id, 'weight', +e.target.value)} className="w-20 p-1 border-gray-300 rounded-md" />
                                                 <span>kg</span>
                                                 <input type="number" value={set.reps} onChange={e => handleSetChange(ex.id, set.id, 'reps', +e.target.value)} className="w-20 p-1 border-gray-300 rounded-md" />

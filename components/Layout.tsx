@@ -1,6 +1,10 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { DashboardIcon, DumbbellIcon, SparklesIcon, BookOpenIcon, QuestionMarkCircleIcon, UserCircleIcon, FireIcon, ChatBubbleIcon, ChartPieIcon, LogoutIcon } from './Icons';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { 
+    DashboardIcon, DumbbellIcon, SparklesIcon, BookOpenIcon, 
+    QuestionMarkCircleIcon, UserCircleIcon, FireIcon, ChatBubbleIcon, 
+    ChartPieIcon, LogoutIcon, MenuIcon 
+} from './Icons';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
@@ -18,7 +22,7 @@ const navItems = [
   { path: '/profile', label: '내 프로필', icon: UserCircleIcon },
 ];
 
-const Sidebar: React.FC = () => {
+const SidebarContent: React.FC = () => {
   const baseLinkClasses = "flex items-center px-4 py-3 text-gray-600 transition-colors duration-200 transform rounded-lg";
   const activeLinkClasses = "bg-blue-100 text-blue-700";
   const inactiveLinkClasses = "hover:bg-gray-200";
@@ -32,8 +36,8 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed top-0 left-0 flex flex-col w-64 h-screen px-4 py-8 bg-white border-r rtl:border-r-0 rtl:border-l">
-      <a href="#" className="flex items-center space-x-2 text-2xl font-bold text-blue-600">
+    <aside className="flex flex-col w-full h-full px-4 py-8 bg-white border-r">
+      <a href="#/" className="flex items-center space-x-2 text-2xl font-bold text-blue-600 px-4">
         <FireIcon className="w-8 h-8"/>
         <span>FitTrack AI</span>
       </a>
@@ -70,12 +74,50 @@ const Sidebar: React.FC = () => {
 
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    // 페이지 이동 시 모바일 사이드바 닫기
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar />
-      <main className="flex-1 p-8 ml-64">
-        {children}
-      </main>
+      {/* Mobile Overlay */}
+      <div
+        className={`fixed inset-0 z-30 bg-black bg-opacity-50 transition-opacity md:hidden ${
+          isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={toggleSidebar}
+      />
+      
+      {/* Sidebar */}
+      <div className={`fixed top-0 left-0 z-40 h-full w-64 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <SidebarContent />
+      </div>
+
+      <div className="flex-1 flex flex-col md:ml-64">
+        {/* Mobile Top Bar */}
+        <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b md:hidden">
+          <button onClick={toggleSidebar} className="text-gray-600 p-2 -ml-2">
+            <MenuIcon className="w-6 h-6" />
+          </button>
+          <a href="#/" className="flex items-center space-x-2 text-xl font-bold text-blue-600">
+            <FireIcon className="w-7 h-7"/>
+            <span>FitTrack AI</span>
+          </a>
+          <div className="w-6"></div> {/* Spacer */}
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 md:p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };

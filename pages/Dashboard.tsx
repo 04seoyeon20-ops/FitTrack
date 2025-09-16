@@ -10,7 +10,7 @@ import Loader from '../components/Loader';
 
 const StatCard: React.FC<{ icon: React.ElementType; label: string; value: string; color: string }> = ({ icon: Icon, label, value, color }) => (
   <div className="bg-white p-6 rounded-xl shadow-md flex items-center">
-    <div className={`p-3 rounded-full mr-4 ${color}`}>
+    <div className={`p-3 rounded-full mr-4 ${color} transition-transform duration-200 ease-in-out hover:scale-110`}>
       <Icon className="w-6 h-6 text-white" />
     </div>
     <div>
@@ -33,7 +33,7 @@ const getWorkoutIcon = (exercise: string) => {
 
 const ActivityPill: React.FC<{ workout: SimpleWorkout }> = ({ workout }) => (
     <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm">
-        <div className="p-3 rounded-full bg-indigo-500">
+        <div className="p-3 rounded-full bg-indigo-500 transition-transform duration-200 ease-in-out hover:scale-110">
             {getWorkoutIcon(workout.exercise)}
         </div>
         <div>

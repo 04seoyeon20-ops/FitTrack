@@ -33,7 +33,7 @@ const MainApp: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  const { isLoading, isAuthenticated, userExists } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
@@ -45,12 +45,7 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      {!userExists ? (
-        <>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="*" element={<Navigate to="/signup" replace />} />
-        </>
-      ) : isAuthenticated ? (
+      {isAuthenticated ? (
         <>
           <Route path="/*" element={<MainApp />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
@@ -59,6 +54,7 @@ const App: React.FC = () => {
       ) : (
         <>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </>
       )}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FireIcon } from '../components/Icons';
 
@@ -8,7 +8,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login, user, userExists } = useAuth();
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -61,7 +61,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-sm p-8 space-y-8 bg-white rounded-xl shadow-lg">
+      <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
         <div className="flex flex-col items-center">
           <a href="#" className="flex items-center space-x-2 text-3xl font-bold text-blue-600">
             <FireIcon className="w-10 h-10"/>
@@ -102,6 +102,14 @@ const Login: React.FC = () => {
             </button>
           </div>
         </form>
+        <div className="text-center text-sm">
+            <span className="text-gray-600">
+                {userExists ? '계정이 없으신가요? ' : '새로운 계정을 만들어 보세요. '}
+            </span>
+            <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                회원가입
+            </Link>
+        </div>
       </div>
     </div>
   );
